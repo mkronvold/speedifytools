@@ -22,7 +22,8 @@ htmldir=/www/gwcheck
 html=${htmldir}/${today}.csv
 
 
-
+### set up output flags, directories and files and build initial headers
+#
 while [[ $# -gt 0 ]] && [[ "$1" == "-"* ]] ;
 do
     opt=${1}
@@ -70,14 +71,19 @@ done
 
 #case "$out" in
 #  "log" )
+#    ;;
 #  "csv" )
+#    ;;
 #  "html" )
+#    ;;
 #  "text" )
+#    ;;
 #  *)
+#    ;;
 #esac
 
 # remove all but last KEEP-1 files
-[ $out = "text" ] || (cd ${outdir} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
+[[ $out == "text" ]] || (cd ${outdir} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
 
 # read the interfaces into an array
 readarray -O 1 -t interfaces <<<  $(netstat -rn | grep -v connectify | grep UG | awk '{print $8}' | sort -u)
@@ -113,7 +119,7 @@ do
     esac
 done
 
-if [ $out = html ]; then
+if [[ $out == "html" ]]; then
   # make html files
 
   # make a copy of the latest for Today
@@ -122,8 +128,9 @@ if [ $out = html ]; then
   # build the index
   index=${outdir}/index.html
   echo "<HTML><BODY>" > $index
-  for i in $(ls -1 ${outdir}.csv); do
-    echo "<a href=\"${i}\">${i}</a><br>" >> $index
+  for i in $(ls -1 ${outdir}/*.csv); do
+    ref=$(basename ${i})
+    echo "<a href=\"/gwcheck/${ref}\">${ref}</a><br>" >> $index
   done
   echo "</BODY></HTML>" >> $index
 fi
