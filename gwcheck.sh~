@@ -68,13 +68,15 @@ do
     shift
 done
 
-#case "$out" in
-#  "log" )
-#  "csv" )
-#  "html" )
-#  "text" )
-#  *)
-#esac
+# Output a header
+case "$out" in
+  "log" )
+  "csv" )
+  "html" )
+  "text" )
+  *)
+esac
+
 
 # remove all but last KEEP-1 files
 [ $out = "text" ] || (cd ${outdir} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
