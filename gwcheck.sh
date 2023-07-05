@@ -9,26 +9,77 @@ TARGET_DNS=1.1.1.1
 TARGET_NACR1=140.177.255.153
 TARGET_NACR2=173.230.126.42
 
-LOGDIR=${HOME}/.gwcheck
-LOG=${LOGDIR}/${TODAY}.log
-
-[ $1 == "--csv" ] && LOGDIR=${HOME}/.gwcheck ; CSV=${LOGDIR}/${TODAY}.csv
-[ $1 == "--html" ] && HTMLDIR=/www/gwcheck ; HTML=${HTMLDIR}/${TODAY}.csv
-
 # Establish some timestamps
-TODAY=$(date +'%Y-%m-%d')
-NOW=$(date +'%H:%M:%S')
-EPOCH=$(date +'%s')
+today=$(date +'%Y-%m-%d')
+now=$(date +'%H:%M:%S')
+epoch=$(date +'%s')
 
-#use a case here
+logdir=${HOME}/.gwcheck
+log=${logdir}/${today}.log
+csvdir=${HOME}/.gwcheck
+csv=${csvdir}/${today}.csv
+htmldir=/www/gwcheck
+html=${htmldir}/${today}.csv
+
+
+
+while [[ $# -gt 0 ]] && [[ "$1" == "-"* ]] ;
+do
+    opt=${1}
+    case "${opt}" in
+        "--" )
+          break 2;;
+        "--csv" )
+          out=csv
+          outdir=$csvdir
+          outfile=$csv
+          [ -f $outfile ] || printf "epoch,date,time,int,iface,ipaddr,gateway,chg,dns,nacr1,nacr2\n" > $outfile
+          ;;
+        "--html" )
+          out=html
+          outdir=$htmldir
+          outfile=$html
+          [ -f $outfile ] || printf "epoch,date,time,int,iface,ipaddr,gateway,chg,dns,nacr1,nacr2\n" > $outfile
+          ;;
+        "--log" )
+          out=log
+          outdir=$logdir
+          outfile=$log
+          [ -f $outfile ] || printf "date,time,int,iface,ipaddr,gateway,chg,dns,nacr1,nacr2\n" > $outfile
+          ;;
+        "--help" )
+            echo "Usage: $0 TODO"
+            exit 1
+            ;;
+        "-h" )
+            echo "Usage: $0 TODO"
+            exit 1
+            ;;
+        "--text" )
+          out=text
+          printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
+          ;;
+        *)
+          # if we fall through and no out was selected, we just log to console
+          out=text
+          printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
+        ;;
+    esac
+    shift
+done
 
 # Output a header
-[ $out = TEXT ] && printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
-[ $out = CSV ] && [ -f $CSV ] || printf "epoch,date,time,int,iface,ipaddr,gateway,chg,dns,nacr1,nacr2\n" > $CSV
-[ $out = HTML ] && [ -f $HTML ] || printf "epoch,date,time,int,iface,ipaddr,gateway,chg,dns,nacr1,nacr2\n" > $HTML
+case "$out" in
+  "log" )
+  "csv" )
+  "html" )
+  "text" )
+  *)
+esac
+
 
 # remove all but last KEEP-1 files
-(cd ${LOGDIR} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
+[ $out = "text" ] || (cd ${outdir} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
 
 # read the interfaces into an array
 readarray -O 1 -t interfaces <<<  $(netstat -rn | grep -v connectify | grep UG | awk '{print $8}' | sort -u)
@@ -47,18 +98,34 @@ do
     [ "$ping_dns" ] || ping_dns=999
     [ "$ping_nacr1" ] || ping_nacr1=999
     [ "$ping_nacr2" ] || ping_nacr2=999
-    printf "$interface \t $ipaddr\t $gateway\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
-    [ -f ${CSV} ] && printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> ${CSV}
+    case "$out" in
+      "log" )
+        printf "$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
+        ;;
+      "csv" )
+        printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
+        ;;
+      "html" )
+        printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
+        ;;
+      *)
+        # includes text
+        printf "$interface \t $ipaddr\t $gateway\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
+        ;;
+    esac
 done
 
-# make html files
-if [ -d $HTMLDIR ]; then
-  echo "<HTML><BODY>" > ${HTMLDIR}/index.html
-  for i in $(ls -1 ${CSVDIR}); do
-    cp ${CSVDIR}/${i} ${HTMLDIR}
-    echo "<a href=\"${i}\">${i}</a><br>" >> ${HTMLDIR}/index.html
+if [ $out = html ]; then
+  # make html files
+
+  # make a copy of the latest for Today
+  cp $outfile ${outdir}/Today.csv
+
+  # build the index
+  index=${outdir}/index.html
+  echo "<HTML><BODY>" > $index
+  for i in $(ls -1 ${outdir}.csv); do
+    echo "<a href=\"${i}\">${i}</a><br>" >> $index
   done
-  echo "</BODY></HTML>" >> ${HTMLDIR}/index.html
+  echo "</BODY></HTML>" >> $index
 fi
-# make a copy for Today
-cp ${CSV} ${HTMLDIR}/Today.html
