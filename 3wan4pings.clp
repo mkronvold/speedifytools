@@ -6,7 +6,7 @@ limit-y: 1 300;
 axes {
   position: bottom left;
   label-format-x: datetime("%H:%M:%S");
-#  label-placement-x: linear-align(1800);
+#label-placement-x: linear-align(1800);
   label-placement-x: linear-interval(900 900 7200);
 }
 
