@@ -61,10 +61,9 @@ do
           printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
           ;;
         *)
-          # if we fall through and no out was selected, we just log to console
           out=text
           printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
-        ;;
+	  ;;
     esac
     shift
 done
