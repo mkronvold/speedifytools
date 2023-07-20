@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# iputils-ping version
+
 PINGCOUNT=2
 WAITTIME=2
 KEEP=32
@@ -83,6 +85,7 @@ done
 #esac
 
 # remove all but last KEEP-1 files
+# don't process if not creating any output
 [[ $out == "text" ]] || (cd ${outdir} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
 
 # read the interfaces into an array
