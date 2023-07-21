@@ -22,6 +22,7 @@ htmldir=/www/gwcheck
 html=${htmldir}/${today}.csv
 
 ### Which ping are we using?
+#
 [ $(file $(which ping) | grep -c busybox) == 1 ] && pinger=busybox || pinger=iputils
 
 
@@ -87,6 +88,7 @@ done
 
 # remove all but last KEEP-1 files
 # don't process if not creating any output
+#
 [[ $out == "text" ]] || (cd ${outdir} && ls -tp | grep -v '/$' | tail -n +${KEEP} | xargs -I {} rm -- {})
 
 # read the interfaces into an array
@@ -95,39 +97,39 @@ readarray -O 1 -t interfaces <<<  $(netstat -rn | grep -v connectify | grep UG |
 # gather ip and gateway info for each interface and ping from each interface to each target
 for i in "${!interfaces[@]}";
 do
-    interface=${interfaces[$i]}
-    ipaddr=$(ip route list match default dev $interface | awk '{print $7}')
-    gateway=$(ip route list match default dev $interface | awk '{print $3}')
-	if [ $pinger == busybox ]; then 
-		ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep round-trip | awk -F/ '{print $4}')
-		ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep round-trip | awk -F/ '{print $4}')
-		ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep round-trip | awk -F/ '{print $4}')
-		ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep round-trip | awk -F/ '{print $4}')
-	else
-		ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep rtt | awk -F/ '{print $5}')
-		ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep rtt | awk -F/ '{print $5}')
-		ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep rtt | awk -F/ '{print $5}')
-		ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep rtt | awk -F/ '{print $5}')
-	fi
-    [ "$ping_chg" ] || ping_chg=999
-    [ "$ping_dns" ] || ping_dns=999
-    [ "$ping_nacr1" ] || ping_nacr1=999
-    [ "$ping_nacr2" ] || ping_nacr2=999
-    case "$out" in
-      "log" )
-        printf "$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
-        ;;
-      "csv" )
-        printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
-        ;;
-      "html" )
-        printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
-        ;;
-      *)
-        # includes text
-        printf "$interface \t $ipaddr\t $gateway\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
-        ;;
-    esac
+  interface=${interfaces[$i]}
+  ipaddr=$(ip route list match default dev $interface | awk '{print $7}')
+  gateway=$(ip route list match default dev $interface | awk '{print $3}')
+  if [ $pinger == busybox ]; then
+    ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep round-trip | awk -F/ '{print $4}')
+    ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep round-trip | awk -F/ '{print $4}')
+    ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep round-trip | awk -F/ '{print $4}')
+    ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep round-trip | awk -F/ '{print $4}')
+  else
+    ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep rtt | awk -F/ '{print $5}')
+    ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep rtt | awk -F/ '{print $5}')
+    ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep rtt | awk -F/ '{print $5}')
+    ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep rtt | awk -F/ '{print $5}')
+  fi
+  [ "$ping_chg" ] || ping_chg=999
+  [ "$ping_dns" ] || ping_dns=999
+  [ "$ping_nacr1" ] || ping_nacr1=999
+  [ "$ping_nacr2" ] || ping_nacr2=999
+  case "$out" in
+    "log" )
+      printf "$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
+      ;;
+    "csv" )
+      printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
+      ;;
+    "html" )
+      printf "$EPOCH,$TODAY,$NOW,$i,$interface,$ipaddr,$gateway,%2.0f,%2.0f,%2.0f,%2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2 >> $outfile
+      ;;
+    *)
+      # includes text
+      printf "$interface \t $ipaddr\t $gateway\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
+      ;;
+  esac
 done
 
 if [[ $out == "html" ]]; then
