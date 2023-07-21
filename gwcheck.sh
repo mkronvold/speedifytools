@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# iputils-ping version
-
 PINGCOUNT=2
 WAITTIME=2
 KEEP=32
@@ -22,6 +20,9 @@ csvdir=${HOME}/.gwcheck
 csv=${csvdir}/${today}.csv
 htmldir=/www/gwcheck
 html=${htmldir}/${today}.csv
+
+### Which ping are we using?
+[ $(file $(which ping) | grep -c busybox) == 1 ] && pinger=busybox || pinger=iputils
 
 
 ### set up output flags, directories and files and build initial headers
@@ -97,10 +98,17 @@ do
     interface=${interfaces[$i]}
     ipaddr=$(ip route list match default dev $interface | awk '{print $7}')
     gateway=$(ip route list match default dev $interface | awk '{print $3}')
-    ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep round-trip | awk -F/ '{print $4}')
-    ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep round-trip | awk -F/ '{print $4}')
-    ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep round-trip | awk -F/ '{print $4}')
-    ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep round-trip | awk -F/ '{print $4}')
+	if [ $pinger == busybox ]; then 
+		ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep round-trip | awk -F/ '{print $4}')
+		ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep round-trip | awk -F/ '{print $4}')
+		ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep round-trip | awk -F/ '{print $4}')
+		ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep round-trip | awk -F/ '{print $4}')
+	else
+		ping_chg=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_CHG | grep rtt | awk -F/ '{print $5}')
+		ping_dns=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_DNS | grep rtt | awk -F/ '{print $5}')
+		ping_nacr1=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR1 | grep rtt | awk -F/ '{print $5}')
+		ping_nacr2=$(ping -q -A -w $WAITTIME -c $PINGCOUNT -I $ipaddr $TARGET_NACR2 | grep rtt | awk -F/ '{print $5}')
+	fi
     [ "$ping_chg" ] || ping_chg=999
     [ "$ping_dns" ] || ping_dns=999
     [ "$ping_nacr1" ] || ping_nacr1=999
