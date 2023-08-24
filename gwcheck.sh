@@ -6,13 +6,8 @@ KEEP=32
 
 TARGET_CHG=gw1.damocles.com
 TARGET_DNS=1.1.1.1
-<<<<<<< HEAD
 TARGET_NACR1=140.177.157.72
-TARGET_NACR2=173.230.126.42
-=======
-TARGET_NACR1=140.177.255.153
 TARGET_NACR2=173.230.126.7
->>>>>>> bf32c7b1144748d3c914e18b674d05af4ac1c56e
 
 # Establish some timestamps
 today=$(date +'%Y-%m-%d')
