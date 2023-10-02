@@ -60,14 +60,10 @@ do
             echo "Usage: $0 TODO"
             exit 1
             ;;
-        "--text" )
-          out=text
-          printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
-          ;;
         *)
           # if we fall through and no out was selected, we just log to console
           out=text
-          printf "iface \t ipaddr \t gateway \t chg \t dns \t nacr1 \t nacr2\n"
+          printf "iface ipaddr \t\t chg \t dns \t nacr1 \t nacr2\n"
         ;;
     esac
     shift
@@ -127,7 +123,7 @@ do
       ;;
     *)
       # includes text
-      printf "$interface \t $ipaddr\t $gateway\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
+      printf "$interface  $ipaddr\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
       ;;
   esac
 done
