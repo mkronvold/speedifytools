@@ -63,7 +63,11 @@ do
         *)
           # if we fall through and no out was selected, we just log to console
           out=text
+<<<<<<< HEAD
           printf "iface ipaddr \t\t chg \t dns \t nacr1 \t nacr2\n"
+=======
+          printf "iface \t ipaddr \t chg \t dns \t nacr1 \t nacr2\n"
+>>>>>>> 4b3c406b61b0e545ae975af5902c907cefa231fe
         ;;
     esac
     shift
@@ -123,7 +127,11 @@ do
       ;;
     *)
       # includes text
+<<<<<<< HEAD
       printf "$interface  $ipaddr\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
+=======
+      printf "$interface \t $ipaddr\t %2.0f   \t %2.0f   \t %2.0f   \t %2.0f\n" $ping_chg $ping_dns $ping_nacr1 $ping_nacr2
+>>>>>>> 4b3c406b61b0e545ae975af5902c907cefa231fe
       ;;
   esac
 done
