@@ -2,6 +2,6 @@
 
 while [ 1 ]; 
 do
-  ./checknet.sh -q || /usr/share/speedify/speedify_cli connect
+  ./checknet.sh -q || (/usr/share/speedify/speedify_cli disconnect ; /usr/share/speedify/speedify_cli connect)
   sleep 30
 done
