@@ -4,11 +4,6 @@ PINGCOUNT=2
 WAITTIME=2
 KEEP=32
 
-TARGET_CHG=gw1.damocles.com
-TARGET_DNS=1.1.1.1
-TARGET_NACR1=140.177.157.72
-TARGET_NACR2=173.230.126.7
-
 in=/root/.wan_interfaces.csv
 wemo=/root/.bin/wemo.sh
 
@@ -32,10 +27,12 @@ do
   current_ipaddr=$(ip route list match default dev $interface | awk '{print $7}')
   if [ "${current_ipaddr}" == "" ]; then
     [ $LOG ] && echo $today $now $interface down >> $LOG || echo $today $now $interface down 
-    #$wemo 10.0.0.118 getstate
-    [ $LOG ] && ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 off ) >> $LOG || ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 off )
-    sleep 3
-    [ $LOG ] && ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 on ) >> $LOG || ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 on )
+    if [ "$interface" == "eth4" ]; then
+      #$wemo 10.0.0.118 getstate
+      [ $LOG ] && ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 off ) >> $LOG || ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 off )
+      sleep 3
+      [ $LOG ] && ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 on ) >> $LOG || ( echo -n $today $now $interface" " ; $wemo 10.0.0.118 on )
+    fi
   else
     [ $LOG ] && echo $today $now $interface up, checking gateway >> $LOG || echo $today $now $interface up, checking gateway
     unset current_gateway
